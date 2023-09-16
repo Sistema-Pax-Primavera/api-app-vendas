@@ -1,30 +1,42 @@
 import { DateTime } from 'luxon'
+import { BaseModel, column, beforeSave } from '@ioc:Adonis/Lucid/Orm'
 import Hash from '@ioc:Adonis/Core/Hash'
-import { column, beforeSave, BaseModel } from '@ioc:Adonis/Lucid/Orm'
+import { formatarString } from 'App/Util/Format'
 
 export default class Usuario extends BaseModel {
+  public static table = 'public.usuario'
+
   @column({ isPrimary: true })
   public id: number
 
   @column()
-  public email: string
+  public nome: string
 
-  @column({ serializeAs: null })
+  @column()
+  public cpf: string
+
+  @column({ serializeAs: null, columnName: 'senha' })
   public password: string
 
   @column()
-  public rememberMeToken: string | null
-
-  @column.dateTime({ autoCreate: true })
-  public createdAt: DateTime
+  public ativo: boolean
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
 
+  @column({ serializeAs: null })
+  public updatedBy: string | null
+
   @beforeSave()
-  public static async hashPassword (usuario: Usuario) {
-    if (usuario.$dirty.password) {
-      usuario.password = await Hash.make(usuario.password)
+  public static async hashPassword(user: Usuario) {
+    if (user.$dirty.password) {
+      user.password = await Hash.make(user.password)
     }
+  }
+
+  // Formata os campos no padrão definido
+  @beforeSave()
+  public static async formatFields(usuario: Usuario) {
+    usuario.updatedBy = formatarString(usuario.updatedBy)
   }
 }
