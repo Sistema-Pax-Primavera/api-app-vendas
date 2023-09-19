@@ -1,7 +1,7 @@
-import { DateTime } from 'luxon'
-import { BaseModel, column, beforeSave } from '@ioc:Adonis/Lucid/Orm'
 import Hash from '@ioc:Adonis/Core/Hash'
+import { BaseModel, beforeSave, column } from '@ioc:Adonis/Lucid/Orm'
 import { formatarString } from 'App/Util/Format'
+import { DateTime } from 'luxon'
 
 export default class Usuario extends BaseModel {
   public static table = 'public.usuario'
@@ -17,6 +17,12 @@ export default class Usuario extends BaseModel {
 
   @column({ serializeAs: null, columnName: 'senha' })
   public password: string
+
+  @column.dateTime()
+  public ultimoAcesso: DateTime | null
+
+  @column.dateTime()
+  public ultimoSincronismo: DateTime | null
 
   @column()
   public ativo: boolean
