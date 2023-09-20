@@ -15,8 +15,6 @@ interface CustomError {
     message?: string
 }
 
-export default class ErrorsFormat {
-    public async errorsFormat(errors: CustomError) {
-        return errors
-    }
+export const errorsFormat = (errors: CustomError) => {
+    return errors
 }
