@@ -4,6 +4,7 @@ import Database from '@ioc:Adonis/Lucid/Database'
 import CustomErrorException from 'App/Exceptions/CustomErrorException'
 import UnAuthorizedException from 'App/Exceptions/UnAuthorizedException'
 import Usuario from 'App/Models/Usuario'
+import { localCobranca, portes, tipoSexo } from 'App/Util/Constantes'
 import { errorsFormat } from 'App/Util/ErrorsFormat'
 import AutenticacaoValidator from 'App/Validators/AutenticacaoValidator'
 import { DateTime } from 'luxon'
@@ -15,6 +16,7 @@ import { DateTime } from 'luxon'
  * @class AutenticacaoController
  */
 export default class AutenticacaoController {
+
     /**
      * Autentica um usuário e retorna um token JWT se for bem-sucedido.
      *
@@ -41,8 +43,8 @@ export default class AutenticacaoController {
             // Retorne uma resposta de sucesso com o token e os dados do usuário
             return response.status(200).send({
                 status: true,
-                message: "Usuário autorizado!",
-                data: { ...usuario, token }
+                message: 'Usuário autorizado!',
+                data: { ...usuario, token, sexo: tipoSexo, tipo_cobranca: localCobranca, portes: portes }
             })
         } catch (error) {
             // Trate qualquer erro que ocorra durante o processo de autenticação
