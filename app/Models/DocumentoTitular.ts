@@ -2,20 +2,19 @@ import { DateTime } from 'luxon'
 import { BaseModel, beforeSave, column } from '@ioc:Adonis/Lucid/Orm'
 import { formatarString } from 'App/Util/Format'
 
-export default class ItemVenda extends BaseModel {
-  public static table = 'venda.item_venda'
-  
-  // ID do titular associado a este item.
+export default class DocumnetoVenda extends BaseModel {
+  public static table = 'arquivo.titular_venda'
+
+  @column({ isPrimary: true })
+  public id: number
+
+  // ID do titular associado ao documento.
   @column()
   public titularId: number
 
-  // ID do item liberado ao titular.
+  // Caminho do documento para ser visualizado ou baixado.
   @column()
-  public itemId: number
-
-  // Quantidade adicionada ao plano.
-  @column()
-  public quantidade: number
+  public documento: string
 
   // Data de criação do registro.
   @column.dateTime({ autoCreate: true })
@@ -41,8 +40,8 @@ export default class ItemVenda extends BaseModel {
    * @memberOf ItemVenda
    */
   @beforeSave()
-  public static async formatFields(item: ItemVenda){
-    item.createdBy = formatarString(item.createdBy)
-    item.updatedBy = formatarString(item.updatedBy)
+  public static async formatFields(arquivo: DocumnetoVenda) {
+    arquivo.createdBy = formatarString(arquivo.createdBy)
+    arquivo.updatedBy = formatarString(arquivo.updatedBy)
   }
 }

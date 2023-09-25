@@ -1,10 +1,70 @@
+import { DateTime } from "luxon"
+import { isValid, parse, parseISO } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+
 export const formatarString = (value: string | null): string | null => {
     if (!value || typeof value !== 'string') return null
     return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase()
 }
 
-export const formatarNumero = (value: string): string => {
+export const formatarNumero = (value: string | null): string | null => {
+    if (!value || typeof value !== 'string') return null;
     return value.replace(/\D/g, '')
+}
+
+export const formatarDecimal = (value: string | number | null): number | null => {
+    const input = String(value);
+
+    if (!/^\d+(\.\d+)?$/.test(input)) {
+        return null
+    }
+
+    const numero = parseFloat(input);
+
+    const numeroFormatado = numero.toFixed(2);
+
+    return parseFloat(numeroFormatado);
+}
+
+export const formatarData = (value: string | Date | null): string | Date | null => {
+
+    if (!value) return null
+
+    value = typeof value !== 'string' ? String(value) : value
+
+    const formats = [
+        'dd/MM/yyyy',
+        'MM/yyyy',
+        'dd/MM/yyyy HH:mm:ss',
+        'yyyy-MM-dd',
+        'yyyy-MM',
+        'yyyy-MM-dd HH:mm:ss'
+    ];
+
+    const formatsTime = [
+       'HH:mm:ss', 'HH:mm'
+    ];
+
+    for (const format of formats) {
+        const parsedDate = parse(value, format, new Date(), { locale: ptBR })
+        if (!isNaN(parsedDate.getTime())) {
+            return parsedDate;
+        }
+    }
+
+    for (const format of formatsTime) {
+        const parsedTime = parse(value, format, new Date(), { locale: ptBR })
+        if (isValid(parsedTime)) {
+            return parsedTime.toISOString();
+        }
+    }
+
+    try {
+        const isoDate = parseISO(value).toISOString();
+        return DateTime.fromISO(isoDate).toJSDate();
+    } catch (error) {
+        throw new Error('Formato de data ou horário inválido');
+    }
 }
 
 export const validaCpf = (value: string): boolean => {
