@@ -20,4 +20,45 @@
 
 import Route from '@ioc:Adonis/Core/Route'
 
-Route.post('/', 'AutenticacaoController.autenticacao')
+Route.group(() => {
+
+    /**
+   * Autenticação de Usuário
+   *
+   * Esta rota permite que um usuário se autentique e obtenha um token de acesso.
+   * Método HTTP: POST
+   * Endpoint: /v1/app-vendas/
+   */
+    Route.post('/', 'AutenticacaoController.autenticacao')
+
+    /**
+   * Envio de Instrução
+   *
+   * Esta rota permite o envio de instruções.
+   * Método HTTP: GET
+   * Endpoint: /v1/app-vendas/envio-instrucao
+   * Middleware: auth:api (Requer autenticação)
+   */
+    Route.get('/envio-instrucao', 'EnvioController.envioInstrucao').middleware('auth:api')
+
+    /**
+   * Sincronismo
+   *
+   * Esta rota permite a sincronização de dados.
+   * Método HTTP: POST
+   * Endpoint: /v1/app-vendas/sincronismo
+   * Middleware: auth:api (Requer autenticação)
+   */
+    Route.post('/sincronismo', 'SincronismoController.sincronismo').middleware('auth:api')
+
+    /**
+   * Upload de Arquivo em Base64
+   *
+   * Esta rota permite o upload de um arquivo em formato Base64.
+   * Método HTTP: POST
+   * Endpoint: /v1/app-vendas/upload
+   * Middleware: auth:api (Requer autenticação)
+   */
+    Route.post('/upload', 'SincronismoController.uploadArquivoBase64').middleware('auth:api')
+
+}).prefix('v1/app-vendas')
