@@ -2,7 +2,7 @@
   "extends": "adonis-preset-ts/tsconfig.json",
   "include": [
     "**/*"
-, "../api-suporte/database/migrations/1695738398148_mensagem_mobiles.ts"  ],
+  ],
   "exclude": [
     "node_modules",
     "build"
