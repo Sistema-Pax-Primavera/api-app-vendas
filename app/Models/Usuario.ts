@@ -1,10 +1,8 @@
 import Hash from '@ioc:Adonis/Core/Hash'
-import { BaseModel, BelongsTo, beforeSave, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, ManyToMany, beforeSave, column, manyToMany } from '@ioc:Adonis/Lucid/Orm'
 import { formatarNumero, formatarString } from 'App/Util/Format'
 import { DateTime } from 'luxon'
 import Unidade from './Unidade'
-import Setor from './Setor'
-import Funcao from './Funcao'
 
 export default class Usuario extends BaseModel {
   public static table = 'public.usuario'
@@ -68,23 +66,18 @@ export default class Usuario extends BaseModel {
   @column()
   public updatedBy: string | null
 
-  @belongsTo(() => Unidade, {
-    foreignKey: 'unidade_id',
-    localKey: 'id'
+  // Relacionamento para buscar as unidades vinculadas ao parentesco.
+  @manyToMany(() => Unidade, {
+    pivotTable: 'public.permissao',
+    localKey: 'id',
+    pivotForeignKey: 'usuario_id',
+    relatedKey: 'id',
+    pivotRelatedForeignKey: 'unidade_id',
+    onQuery: (query) => {
+      query.where('public.permissao.ativo', true)
+    }
   })
-  public unidade: BelongsTo<typeof Unidade>
-
-  @belongsTo(() => Setor, {
-    foreignKey: 'setor_id',
-    localKey: 'id'
-  })
-  public setor: BelongsTo<typeof Setor>
-
-  @belongsTo(() => Funcao, {
-    foreignKey: 'funcao_id',
-    localKey: 'id'
-  })
-  public funcao: BelongsTo<typeof Funcao>
+  public unidades: ManyToMany<typeof Unidade>
 
   @beforeSave()
   public static async hashPassword(user: Usuario) {

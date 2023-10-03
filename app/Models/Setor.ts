@@ -3,16 +3,17 @@ import { formatarString } from 'App/Util/Format'
 import { DateTime } from 'luxon'
 
 export default class Setor extends BaseModel {
+  // Definição do nome da tabela.
   public static table = 'public.setor'
 
   @column({ isPrimary: true })
   public id: number
 
-  // Nome da setor.
+  // Nome do setor.
   @column()
   public descricao: string | null
 
-  // Indica se a setor está ativa.
+  // Indica se o resgistro está ativo.
   @column()
   public ativo: boolean
 
@@ -33,7 +34,7 @@ export default class Setor extends BaseModel {
   public updatedBy: string | null
 
   /**
-  * Método de gancho (hook) que formata os campos do dependente antes de salvá-los.
+  * Método de gancho (hook) que formata os campos do registro antes de salvá-los.
   *
   * @param {Setor} setor - O objeto Setor a ser formatado.
   *
