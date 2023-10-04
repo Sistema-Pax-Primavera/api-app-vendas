@@ -16,5 +16,5 @@ interface CustomError {
 }
 
 export const errorsFormat = (errors: CustomError) => {
-    return errors
+    return errors.message
 }

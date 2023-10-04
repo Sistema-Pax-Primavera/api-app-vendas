@@ -101,7 +101,6 @@ export default class AutenticacaoController {
 
             return usuario
         } catch (error) {
-            console.log(error)
             throw new CustomErrorException(error)
         }
     }

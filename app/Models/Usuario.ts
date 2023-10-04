@@ -66,7 +66,7 @@ export default class Usuario extends BaseModel {
   @column()
   public updatedBy: string | null
 
-  // Relacionamento para buscar as unidades vinculadas ao parentesco.
+  // Relacionamento para buscar as unidades que o usuário possui acesso.
   @manyToMany(() => Unidade, {
     pivotTable: 'public.permissao',
     localKey: 'id',
