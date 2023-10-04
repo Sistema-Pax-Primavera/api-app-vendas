@@ -73,16 +73,25 @@ export default class Usuario extends BaseModel {
     pivotForeignKey: 'usuario_id',
     relatedKey: 'id',
     pivotRelatedForeignKey: 'unidade_id',
+    pivotColumns: ['acao', 'modulo_id'],
     onQuery: (query) => {
       query.where('public.permissao.ativo', true)
     }
   })
   public unidades: ManyToMany<typeof Unidade>
 
+  /**
+  * Método de gancho (hook) que gera um hash da senha antes de salvá-la
+  *
+  * @param {Usuario} user - O objeto Usuario da senha a ser criptografada.
+  *
+  * @memberOf Usuario
+  */
   @beforeSave()
   public static async hashPassword(user: Usuario) {
     if (user.$dirty.password) {
       user.password = await Hash.make(user.password)
+      
     }
   }
 

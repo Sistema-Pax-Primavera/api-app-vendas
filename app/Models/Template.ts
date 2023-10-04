@@ -5,7 +5,7 @@ import Unidade from './Unidade'
 
 export default class Template extends BaseModel {
   // Definição do nome da tabela.
-  public static table = 'public.template'
+  public static table = 'venda.template'
 
   @column({ isPrimary: true })
   public id: number

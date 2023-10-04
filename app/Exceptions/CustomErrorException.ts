@@ -19,7 +19,7 @@ export default class CustomErrorException extends Exception {
         if (error.code === 'E_VALIDATION_FAILURE') {
             return ctx.response.status(400).send(error.messages)
         }
-
-        return ctx.response.status(error.status).send(error.message)
+        
+        return ctx.response.status(error.status).send(error)
     }
 }

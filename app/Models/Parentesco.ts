@@ -5,7 +5,7 @@ import Unidade from './Unidade'
 
 export default class Parentesco extends BaseModel {
   // Definição do nome da tabela.
-  public static table = 'cobranca.parentesco'
+  public static table = 'public.parentesco'
 
   @column({ isPrimary: true })
   public id: number

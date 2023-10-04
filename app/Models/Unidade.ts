@@ -1,6 +1,10 @@
-import { BaseModel, beforeSave, column } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, ManyToMany, beforeSave, column, manyToMany } from '@ioc:Adonis/Lucid/Orm'
 import { formatarNumero, formatarString } from 'App/Util/Format'
 import { DateTime } from 'luxon'
+import Template from './Template'
+import Adicional from './Adicional'
+import Parentesco from './Parentesco'
+import Plano from './Plano'
 
 export default class Unidade extends BaseModel {
   public static table = 'public.unidade'
@@ -83,6 +87,64 @@ export default class Unidade extends BaseModel {
   // Nome do responsável pela atualização do registro.
   @column()
   public updatedBy: string | null
+
+  // Relacionamento para buscar os templates vinculados a unidade.
+  @manyToMany(() => Template, {
+    pivotTable: 'venda.template_unidade',
+    localKey: 'id',
+    pivotForeignKey: 'unidade_id',
+    relatedKey: 'id',
+    pivotRelatedForeignKey: 'template_id',
+    onQuery: (query) => {
+      query.where('venda.template.ativo', true)
+    }
+  })
+  public templates: ManyToMany<typeof Template>
+
+  // Relacionamento para buscar os adicionais vinculados a unidade.
+  @manyToMany(() => Adicional, {
+    pivotTable: 'cobranca.adicional_unidade',
+    localKey: 'id',
+    pivotForeignKey: 'unidade_id',
+    relatedKey: 'id',
+    pivotRelatedForeignKey: 'adicional_id',
+    pivotColumns: ['valor_adesao', 'valor_mensalidade', 'carencia_novo', 'carencia_atraso'],
+    onQuery: (query) => {
+      query.where('cobranca.adicional.ativo', true)
+    }
+  })
+  public adicionais: ManyToMany<typeof Adicional>
+
+  // Relacionamento para buscar os parentescos vinculados a unidade.
+  @manyToMany(() => Parentesco, {
+    pivotTable: 'cobranca.parentesco_unidade',
+    localKey: 'id',
+    pivotForeignKey: 'unidade_id',
+    relatedKey: 'id',
+    pivotRelatedForeignKey: 'parentesco_id',
+    pivotColumns: ['adicional'],
+    onQuery: (query) => {
+      query.where('public.parentesco.ativo', true)
+    }
+  })
+  public parentescos: ManyToMany<typeof Parentesco>
+
+  // Relacionamento para buscar os planos vinculados a unidade.
+  @manyToMany(() => Plano, {
+    pivotTable: 'cobranca.plano_unidade',
+    localKey: 'id',
+    pivotForeignKey: 'unidade_id',
+    relatedKey: 'id',
+    pivotRelatedForeignKey: 'plano_id',
+    pivotColumns: [
+      'valor_adesao', 'valor_mensalidade', 'valor_cartao', 'valor_adicional',
+      'valor_transferencia', 'carencia_novo', 'carencia_atraso', 'limite_dependente'
+    ],
+    onQuery: (query) => {
+      query.where('cobranca.plano.ativo', true)
+    }
+  })
+  public planos: ManyToMany<typeof Plano>
 
   /**
   * Método de gancho (hook) que formata os campos do dependente antes de salvá-los.
