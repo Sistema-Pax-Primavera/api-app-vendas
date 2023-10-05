@@ -2,6 +2,13 @@ import { AuthContract } from '@ioc:Adonis/Addons/Auth'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import CustomErrorException from 'App/Exceptions/CustomErrorException'
 import UnAuthorizedException from 'App/Exceptions/UnAuthorizedException'
+import Bairro from 'App/Models/Bairro'
+import Especie from 'App/Models/Especie'
+import EstadoCivil from 'App/Models/EstadoCivil'
+import Municipio from 'App/Models/Municipio'
+import Profissao from 'App/Models/Profissao'
+import Raca from 'App/Models/Raca'
+import Religiao from 'App/Models/Religiao'
 import Usuario from 'App/Models/Usuario'
 import { localCobranca, portes, tipoSexo } from 'App/Util/Constantes'
 import { errorsFormat } from 'App/Util/ErrorsFormat'
@@ -39,11 +46,34 @@ export default class AutenticacaoController {
             // Atualize o último acesso do usuário
             await this.atualizaUltimoAcesso(usuario.id)
 
+            const [estadoCivil, municipio, religiao, profissao, especie, raca, bairro] = await Promise.all([
+                await EstadoCivil.query().where('ativo', true),
+                await Municipio.query().where('ativo', true),
+                await Religiao.query().where('ativo', true),
+                await Profissao.query().where('ativo', true),
+                await Especie.query().where('ativo', true),
+                await Raca.query().where('ativo', true),
+                await Bairro.query().where('ativo', true)
+            ])
+
             // Retorne uma resposta de sucesso com o token e os dados do usuário
             return response.status(200).send({
                 status: true,
                 message: 'Usuário autorizado!',
-                data: { ...usuario, token, sexo: tipoSexo, tipo_cobranca: localCobranca, portes: portes }
+                data: {
+                    ...usuario.toJSON(),
+                    municipio,
+                    religiao,
+                    profissao,
+                    especie,
+                    raca,
+                    bairro,
+                    estado_civil: estadoCivil,
+                    sexo: tipoSexo,
+                    tipo_cobranca: localCobranca,
+                    portes: portes,
+                    token
+                }
             })
         } catch (error) {
             // Trate qualquer erro que ocorra durante o processo de autenticação
@@ -66,6 +96,11 @@ export default class AutenticacaoController {
         try {
             const usuario = await Usuario.query()
                 .preload('unidades', (unidadeQuery) => {
+                    unidadeQuery.select([
+                        'id', 'descricao', 'razao_social', 'cnpj', 'telefone', 'email', 'cep',
+                        'uf', 'municipio', 'bairro', 'rua', 'numero', 'complemento'
+
+                    ])
                     unidadeQuery.preload('templates', (templateQuery) => {
                         templateQuery.select(['id', 'descricao', 'template'])
                     })
@@ -82,6 +117,12 @@ export default class AutenticacaoController {
                             .pivotColumns([
                                 'valor_adesao', 'valor_mensalidade', 'valor_adicional',
                                 'valor_transferencia', 'limite_dependente', 'carencia_novo'
+                            ])
+                    })
+                    unidadeQuery.preload('itens', (itemQuery) => {
+                        itemQuery.select(['id', 'descricao', 'categoria_item_id'])
+                            .pivotColumns([
+                                'quantidade', 'valor_adesao', 'valor_mensalidade'
                             ])
                     })
                 })

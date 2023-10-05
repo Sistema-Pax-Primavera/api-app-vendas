@@ -1,7 +1,6 @@
-import { BaseModel, ManyToMany, beforeSave, column, manyToMany } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, beforeSave, column } from '@ioc:Adonis/Lucid/Orm'
 import { formatarString } from 'App/Util/Format'
 import { DateTime } from 'luxon'
-import Unidade from './Unidade'
 
 export default class Item extends BaseModel {
   // Definição do nome da tabela.
@@ -37,21 +36,6 @@ export default class Item extends BaseModel {
   // Nome do responsável pela atualização do registro.
   @column()
   public updatedBy: string | null
-
-  // Relacionamento para buscar as unidades vinculadas ao item.
-  @manyToMany(() => Unidade, {
-    pivotTable: 'cobranca.plano_item',
-    localKey: 'id',
-    pivotForeignKey: 'item_id',
-    relatedKey: 'id',
-    pivotRelatedForeignKey: 'unidade_id',
-    pivotColumns: ['quantidade', 'valor_adesao', 'valor_mensalidade'],
-    onQuery: (query) => {
-      query.where('cobranca.plano_item.ativo', true)
-      .andWhereNull('cobranca.plano_item.plano_id')
-    }
-  })
-  public unidades: ManyToMany<typeof Unidade>
 
   /**
   * Método de gancho (hook) que formata os campos do registro antes de salvá-los.

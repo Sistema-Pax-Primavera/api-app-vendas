@@ -4,7 +4,7 @@ import { DateTime } from 'luxon'
 
 export default class Raca extends BaseModel {
   // Definição do nome da tabela.
-  public static table = 'cobranca.raca'
+  public static table = 'public.raca'
 
   @column({ isPrimary: true })
   public id: number

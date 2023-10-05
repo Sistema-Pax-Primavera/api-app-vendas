@@ -1,7 +1,6 @@
-import { DateTime } from 'luxon'
-import { BaseModel, ManyToMany, beforeSave, column, manyToMany } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, beforeSave, column } from '@ioc:Adonis/Lucid/Orm'
 import { formatarString } from 'App/Util/Format'
-import Unidade from './Unidade'
+import { DateTime } from 'luxon'
 
 export default class Parentesco extends BaseModel {
   // Definição do nome da tabela.
@@ -33,20 +32,6 @@ export default class Parentesco extends BaseModel {
   // Nome do responsável pela atualização do registro.
   @column()
   public updatedBy: string | null
-
-  // Relacionamento para buscar as unidades vinculadas ao parentesco.
-  @manyToMany(() => Unidade, {
-    pivotTable: 'cobranca.parentesco_unidade',
-    localKey: 'id',
-    pivotForeignKey: 'parentesco_id',
-    relatedKey: 'id',
-    pivotRelatedForeignKey: 'unidade_id',
-    pivotColumns: ['adicional'],
-    onQuery: (query) => {
-      query.where('cobranca.parentesco_unidade.ativo', true)
-    }
-  })
-  public unidades: ManyToMany<typeof Unidade>
 
   /**
   * Método de gancho (hook) que formata os campos do registro antes de salvá-los.

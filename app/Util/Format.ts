@@ -42,7 +42,7 @@ export const formatarData = (value: string | Date | null): string | Date | null 
     ];
 
     const formatsTime = [
-       'HH:mm:ss', 'HH:mm'
+        'HH:mm:ss', 'HH:mm'
     ];
 
     for (const format of formats) {
@@ -90,4 +90,15 @@ export const validaCpf = (value: string): boolean => {
     if (resto !== parseInt(cpfFormatado?.substring(10, 11))) return false
 
     return true
+}
+
+export const formatarExtras = (extras: Object): Object => {
+    const extrasLimpos = {};
+    for (const key in extras) {
+        if (Object.prototype.hasOwnProperty.call(extras, key)) {
+            const chaveLimpa = key.replace(/^pivot_/, '');
+            extrasLimpos[chaveLimpa] = extras[key];
+        }
+    }
+    return extrasLimpos;
 }

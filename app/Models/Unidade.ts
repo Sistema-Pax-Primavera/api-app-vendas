@@ -1,10 +1,11 @@
 import { BaseModel, ManyToMany, beforeSave, column, manyToMany } from '@ioc:Adonis/Lucid/Orm'
-import { formatarNumero, formatarString } from 'App/Util/Format'
+import { formatarNumero, formatarString, formatarExtras } from 'App/Util/Format'
 import { DateTime } from 'luxon'
 import Template from './Template'
 import Adicional from './Adicional'
 import Parentesco from './Parentesco'
 import Plano from './Plano'
+import Item from './Item'
 
 export default class Unidade extends BaseModel {
   public static table = 'public.unidade'
@@ -145,6 +146,76 @@ export default class Unidade extends BaseModel {
     }
   })
   public planos: ManyToMany<typeof Plano>
+
+  // Relacionamento para buscar os planos vinculados a unidade.
+  @manyToMany(() => Item, {
+    pivotTable: 'cobranca.plano_item',
+    localKey: 'id',
+    pivotForeignKey: 'unidade_id',
+    relatedKey: 'id',
+    pivotRelatedForeignKey: 'item_id',
+    pivotColumns: [
+      'plano_id', 'quantidade', 'valor_adesao', 'valor_mensalidade',
+    ],
+    onQuery: (query) => {
+      query.where('public.item.ativo', true)
+    }
+  })
+  public itens: ManyToMany<typeof Item>
+
+  /**
+   * Método toJSON personalizado para formatar o retorno das informações adicionais.
+   *
+   * @return {Object} 
+   * @memberof Unidade
+   */
+  public toJSON(): Object {
+    return {
+      id: this.id,
+      descricao: this.descricao,
+      razao_social: this.razaoSocial,
+      cnpj: this.cnpj,
+      telefone: this.telefone,
+      email: this.email,
+      cep: this.cep,
+      uf: this.uf,
+      municipio: this.municipio,
+      bairro: this.bairro,
+      rua: this.rua,
+      numero: this.numero,
+      complemento: this.complemento,
+      templates: this.templates ? this.templates.map((item) => {
+        return {
+          ...item.toJSON(),
+          ...item.$extras
+        }
+      }) : [],
+      parentescos: this.parentescos ? this.parentescos.map((item) => {
+        return {
+          ...item.toJSON(),
+          ...formatarExtras(item.$extras)
+        }
+      }) : [],
+      adicionais: this.adicionais ? this.adicionais.map((item) => {
+        return {
+          ...item.toJSON(),
+          ...formatarExtras(item.$extras)
+        }
+      }) : [],
+      planos: this.planos ? this.planos.map((item) => {
+        return {
+          ...item.toJSON(),
+          ...formatarExtras(item.$extras)
+        }
+      }) : [],
+      itens: this.itens ? this.itens.map((item) => {
+        return {
+          ...item.toJSON(),
+          ...formatarExtras(item.$extras)
+        }
+      }) : []
+    }
+  }
 
   /**
   * Método de gancho (hook) que formata os campos do dependente antes de salvá-los.

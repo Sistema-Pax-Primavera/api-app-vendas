@@ -81,6 +81,26 @@ export default class Usuario extends BaseModel {
   public unidades: ManyToMany<typeof Unidade>
 
   /**
+   * Método toJSON personalizado para formatar o retorno das informações adicionais.
+   *
+   * @return {Object} 
+   * @memberof Unidade
+   */
+  public toJSON(): Object {
+    return {
+      id: this.id,
+      nome: this.nome,
+      cpf: this.cpf,
+      ativo: this.ativo,
+      unidades: this.unidades.map((item)=>{
+        return {
+          ...item.toJSON()
+        }
+      })
+    }
+  }
+
+  /**
   * Método de gancho (hook) que gera um hash da senha antes de salvá-la
   *
   * @param {Usuario} user - O objeto Usuario da senha a ser criptografada.
@@ -91,7 +111,7 @@ export default class Usuario extends BaseModel {
   public static async hashPassword(user: Usuario) {
     if (user.$dirty.password) {
       user.password = await Hash.make(user.password)
-      
+
     }
   }
 
