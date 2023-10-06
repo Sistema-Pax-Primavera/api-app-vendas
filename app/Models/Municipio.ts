@@ -47,6 +47,7 @@ export default class Municipio extends BaseModel {
   @beforeSave()
   public static async formatFields(municipio: Municipio) {
     municipio.descricao = formatarString(municipio.descricao)
+    municipio.uf = formatarString(municipio.uf)
     municipio.createdBy = formatarString(municipio.createdBy)
     municipio.updatedBy = formatarString(municipio.updatedBy)
   }
