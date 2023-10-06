@@ -13,6 +13,10 @@ export default class Municipio extends BaseModel {
   @column()
   public descricao: string | null
 
+  // UF do município.
+  @column()
+  public uf: string | null
+
   // Indica se o resgistro está ativo.
   @column()
   public ativo: boolean
