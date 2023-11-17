@@ -61,4 +61,4 @@ Route.group(() => {
    */
     Route.post('/upload', 'SincronismoController.uploadArquivoBase64').middleware('auth:api')
 
-}).prefix('v1/app-vendas')
+}).prefix('api/v1/app-vendas')

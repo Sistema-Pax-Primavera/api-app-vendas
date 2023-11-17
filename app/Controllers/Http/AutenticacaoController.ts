@@ -1,7 +1,5 @@
 import { AuthContract } from '@ioc:Adonis/Addons/Auth'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import CustomErrorException from 'App/Exceptions/CustomErrorException'
-import UnAuthorizedException from 'App/Exceptions/UnAuthorizedException'
 import Bairro from 'App/Models/Bairro'
 import Especie from 'App/Models/Especie'
 import EstadoCivil from 'App/Models/EstadoCivil'
@@ -132,17 +130,17 @@ export default class AutenticacaoController {
 
             // Verifique se o usuário está ativo
             if (!usuario.ativo) {
-                throw new UnAuthorizedException('Usuário inativo! Entre em contato com o suporte.', 403)
+                throw new Error('Usuário inativo! Entre em contato com o suporte.')
             }
 
             // Verifique se o usuário possui autorização para acessar o aplicativo
             if (!Array.isArray(usuario.unidades) || usuario.unidades.length <= 0) {
-                throw new UnAuthorizedException('Usuário não possui autorização de acesso ao aplicativo', 403)
+                throw new Error('Usuário não possui autorização de acesso ao aplicativo')
             }
 
             return usuario
         } catch (error) {
-            throw new CustomErrorException(error)
+            throw new Error(error)
         }
     }
 
@@ -165,7 +163,7 @@ export default class AutenticacaoController {
             return token.token
 
         } catch (error) {
-            throw new UnAuthorizedException(error)
+            throw new Error(error)
         }
     }
 
