@@ -93,48 +93,51 @@ export default class AutenticacaoController {
     private async buscaUsuario(cpfUsuario: string): Promise<Usuario> {
         try {
             const usuario = await Usuario.query()
-                .preload('unidades', (unidadeQuery) => {
-                    unidadeQuery.select([
-                        'id', 'descricao', 'razao_social', 'cnpj', 'telefone', 'email', 'cep',
-                        'uf', 'municipio', 'bairro', 'rua', 'numero', 'complemento'
+                .preload('permissao', (permissaoQuery) => {
+                    permissaoQuery.preload('unidade', (unidadeQuery) => {
+                        unidadeQuery.select([
+                            'id', 'descricao', 'razao_social', 'cnpj', 'telefone', 'email', 'cep',
+                            'uf', 'municipio', 'bairro', 'rua', 'numero', 'complemento'
 
-                    ])
-                    unidadeQuery.preload('templates', (templateQuery) => {
-                        templateQuery.select(['id', 'descricao', 'template'])
-                    })
-                    unidadeQuery.preload('adicionais', (adicionalQuery) => {
-                        adicionalQuery.select(['id', 'descricao', 'pet', 'porte', 'resgate'])
-                            .pivotColumns(['valor_adesao', 'valor_mensalidade'])
-                    })
-                    unidadeQuery.preload('parentescos', (parentescoQuery) => {
-                        parentescoQuery.select(['id', 'descricao'])
-                            .pivotColumns(['adicional'])
-                    })
-                    unidadeQuery.preload('planos', (planoQuery) => {
-                        planoQuery.select(['id', 'descricao'])
-                            .pivotColumns([
-                                'valor_adesao', 'valor_mensalidade', 'valor_adicional',
-                                'valor_transferencia', 'limite_dependente', 'carencia_novo'
-                            ])
-                    })
-                    unidadeQuery.preload('itens', (itemQuery) => {
-                        itemQuery.select(['id', 'descricao', 'categoria_item_id'])
-                            .pivotColumns([
-                                'quantidade', 'valor_adesao', 'valor_mensalidade'
-                            ])
+                        ])
+                        unidadeQuery.preload('templates', (templateQuery) => {
+                            templateQuery.select(['id', 'descricao', 'template'])
+                        })
+                        unidadeQuery.preload('adicionais', (adicionalQuery) => {
+                            adicionalQuery.select(['id', 'descricao', 'pet', 'porte', 'resgate'])
+                                .pivotColumns(['valor_adesao', 'valor_mensalidade'])
+                        })
+                        unidadeQuery.preload('parentescos', (parentescoQuery) => {
+                            parentescoQuery.select(['id', 'descricao'])
+                                .pivotColumns(['adicional'])
+                        })
+                        unidadeQuery.preload('planos', (planoQuery) => {
+                            planoQuery.select(['id', 'descricao'])
+                                .pivotColumns([
+                                    'valor_adesao', 'valor_mensalidade', 'valor_adicional',
+                                    'valor_transferencia', 'limite_dependente', 'carencia_novo'
+                                ])
+                        })
+                        unidadeQuery.preload('itens', (itemQuery) => {
+                            itemQuery.select(['id', 'descricao', 'categoria_item_id'])
+                                .pivotColumns([
+                                    'quantidade', 'valor_adesao', 'valor_mensalidade'
+                                ])
+                        })
                     })
                 })
                 .select(['id', 'nome', 'cpf', 'ultimo_acesso', 'ultimo_sincronismo', 'ativo'])
                 .where('cpf', cpfUsuario)
                 .firstOrFail()
 
+                
             // Verifique se o usuário está ativo
             if (!usuario.ativo) {
                 throw new Error('Usuário inativo! Entre em contato com o suporte.')
             }
 
             // Verifique se o usuário possui autorização para acessar o aplicativo
-            if (!Array.isArray(usuario.unidades) || usuario.unidades.length <= 0) {
+            if (!Array.isArray(usuario.permissao) || usuario.permissao.length <= 0) {
                 throw new Error('Usuário não possui autorização de acesso ao aplicativo')
             }
 

@@ -1,8 +1,8 @@
 import Hash from '@ioc:Adonis/Core/Hash'
-import { BaseModel, ManyToMany, beforeSave, column, manyToMany } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, HasMany, beforeSave, column, hasMany } from '@ioc:Adonis/Lucid/Orm'
 import { formatarNumero, formatarString } from 'App/Util/Format'
 import { DateTime } from 'luxon'
-import Unidade from './Unidade'
+import Permissao from './Permissao'
 
 export default class Usuario extends BaseModel {
   public static table = 'public.usuario'
@@ -67,18 +67,15 @@ export default class Usuario extends BaseModel {
   public updatedBy: string | null
 
   // Relacionamento para buscar as unidades que o usuário possui acesso.
-  @manyToMany(() => Unidade, {
-    pivotTable: 'public.permissao',
-    localKey: 'id',
-    pivotForeignKey: 'usuario_id',
-    relatedKey: 'id',
-    pivotRelatedForeignKey: 'unidade_id',
-    pivotColumns: ['acao', 'modulo_id'],
+  @hasMany(() => Permissao, {
     onQuery: (query) => {
-      query.where('public.permissao.ativo', true)
+      query.join('public.modulo', 'public.modulo.id', 'modulo_id')
+        .preload('unidade')
+        .where('public.permissao.ativo', true)
+        .andWhereILike('public.modulo.descricao', '%APP VENDAS%')
     }
   })
-  public unidades: ManyToMany<typeof Unidade>
+  public permissao: HasMany<typeof Permissao>
 
   /**
    * Método toJSON personalizado para formatar o retorno das informações adicionais.
@@ -92,9 +89,9 @@ export default class Usuario extends BaseModel {
       nome: this.nome,
       cpf: this.cpf,
       ativo: this.ativo,
-      unidades: this.unidades.map((item)=>{
+      unidades: this.permissao.map((item) => {
         return {
-          ...item.toJSON()
+          ...item.unidade.toJSON()
         }
       })
     }
