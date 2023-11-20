@@ -72,7 +72,7 @@ export default class TitularVenda extends BaseModel {
 
   // Número de contrato do plano.
   @column()
-  public contrato: number
+  public contrato: number | null
 
   // Telefone do titular.
   @column()
@@ -212,7 +212,7 @@ export default class TitularVenda extends BaseModel {
 
   // Horário de cobrança ideal.
   @column()
-  public horarioCobranca: string | Date | null
+  public horarioCobranca: string | null
 
   // ID do template (TIPO) da venda.
   @column()
@@ -276,7 +276,6 @@ export default class TitularVenda extends BaseModel {
     titular.dataCancelamento = formatarData(titular.dataCancelamento)
     titular.dataContratoAnterior = formatarData(titular.dataContratoAnterior)
     titular.ultimoMesPagoAnterior = formatarData(titular.ultimoMesPagoAnterior)
-    titular.horarioCobranca = formatarData(titular.horarioCobranca)
     titular.createdBy = formatarString(titular.createdBy)
     titular.updatedBy = formatarString(titular.updatedBy)
   }

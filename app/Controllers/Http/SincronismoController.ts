@@ -15,7 +15,7 @@ export default class SincronismosController {
      *
      * @param {HttpContextContract} ctx - O contexto da solicitação HTTP.
      */
-    public async uploadArquivoBase64({ request, response }: HttpContextContract) {
+    public async uploadArquivoBase64({ request, response, auth }: HttpContextContract) {
         try {
             const { arquivoBase64, titularId } = request.only(['arquivoBase64', 'titularId']);
 
@@ -23,13 +23,14 @@ export default class SincronismosController {
 
             const nomeArquivo = `${DateTime.now().toFormat('yyyyMMddHHmmss')}.pdf`;
 
-            const caminhoArquivo = path.join('/Arquivos', nomeArquivo);
+            const caminhoArquivo = path.join(nomeArquivo);
 
             fs.writeFileSync(caminhoArquivo, arquivoBinario);
 
             const arquivo = await DocumentoVenda.create({
                 titularId,
-                documento: caminhoArquivo
+                documento: caminhoArquivo,
+                createdBy: auth.user?.nome
             });
 
             return response.status(200).send({
@@ -38,6 +39,7 @@ export default class SincronismosController {
                 data: arquivo.toJSON(),
             });
         } catch (error) {
+            console.log(error)
             return response.status(500).send({
                 status: false,
                 message: 'Erro ao fazer upload do arquivo.',
@@ -54,14 +56,15 @@ export default class SincronismosController {
         try {
             const dados = request.body()
 
-            let retornoContratos = new Map()
+            let retornoContratos = new Set()
 
             for (const contrato of dados.contratos) {
-                this.cadastroTitular(contrato, auth).then((result) => {
-                    retornoContratos.set(contrato.id, result)
+                retornoContratos.add(await this.cadastroTitular(contrato, auth).then((result) => {
+                    return ({ id: contrato.titular.id, message: result })
                 }).catch((error) => {
-                    retornoContratos.set(contrato.id, error)
-                })
+                    return ({ id: contrato.titular.id, message: error.message })
+                }))
+                console.log(retornoContratos)
             }
 
             return response.status(200).send({
@@ -84,11 +87,12 @@ export default class SincronismosController {
      * @param {TitularVenda} contrato - O objeto TitularVenda a ser cadastrado.
      * @param {AuthContract} auth - O objeto de autenticação.
      */
-    private async cadastroTitular(contrato: TitularVenda, auth: AuthContract) {
+    private async cadastroTitular(contrato: any, auth: AuthContract) {
         try {
-            delete contrato.id
+            delete contrato.titular.id
+
             const titular = await TitularVenda.create({
-                ...contrato,
+                ...contrato.titular,
                 createdBy: auth.user?.nome
             })
 

@@ -4,13 +4,13 @@ import { formatarString } from 'App/Util/Format'
 
 export default class ItemVenda extends BaseModel {
   public static table = 'venda.item_venda'
-  
+
   // ID do titular associado a este item.
-  @column()
+  @column({ isPrimary: true })
   public titularId: number
 
   // ID do item liberado ao titular.
-  @column()
+  @column({ isPrimary: true })
   public itemId: number
 
   // Quantidade adicionada ao plano.
@@ -41,7 +41,7 @@ export default class ItemVenda extends BaseModel {
    * @memberOf ItemVenda
    */
   @beforeSave()
-  public static async formatFields(item: ItemVenda){
+  public static async formatFields(item: ItemVenda) {
     item.createdBy = formatarString(item.createdBy)
     item.updatedBy = formatarString(item.updatedBy)
   }
