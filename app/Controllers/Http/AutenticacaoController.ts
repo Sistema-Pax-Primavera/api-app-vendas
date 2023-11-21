@@ -130,7 +130,6 @@ export default class AutenticacaoController {
                 .where('cpf', cpfUsuario)
                 .firstOrFail()
 
-                
             // Verifique se o usuário está ativo
             if (!usuario.ativo) {
                 throw new Error('Usuário inativo! Entre em contato com o suporte.')

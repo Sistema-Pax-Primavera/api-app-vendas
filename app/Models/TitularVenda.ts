@@ -1,8 +1,6 @@
 import { DateTime } from 'luxon'
 import { BaseModel, beforeSave, column } from '@ioc:Adonis/Lucid/Orm'
 import { formatarData, formatarNumero, formatarString } from 'App/Util/Format'
-import DependenteVenda from './DependenteVenda'
-import ItemVenda from './ItemVenda'
 
 export default class TitularVenda extends BaseModel {
   public static table = 'venda.titular_venda'
@@ -233,10 +231,6 @@ export default class TitularVenda extends BaseModel {
   // Nome do responsável pela atualização do registro.
   @column()
   public updatedBy: string | null
-
-  public dependentes: Array<DependenteVenda>
-
-  public itens: Array<ItemVenda>
 
   /**
   * Método de gancho (hook) que formata os campos do dependente antes de salvá-los.

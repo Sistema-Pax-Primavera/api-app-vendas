@@ -6,11 +6,11 @@ export default class DependenteVenda extends BaseModel {
   public static table = 'venda.dependente_venda'
 
   @column({ isPrimary: true })
-  public id: number
+  public id?: number
 
   // ID do titular associado a este dependente.
   @column()
-  public titularId: number
+  public titularId?: number
 
   // ID do tipo de parentesco com o titular.
   @column()

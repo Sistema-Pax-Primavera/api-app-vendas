@@ -7,7 +7,7 @@ export default class ItemVenda extends BaseModel {
 
   // ID do titular associado a este item.
   @column({ isPrimary: true })
-  public titularId: number
+  public titularId?: number
 
   // ID do item liberado ao titular.
   @column({ isPrimary: true })
