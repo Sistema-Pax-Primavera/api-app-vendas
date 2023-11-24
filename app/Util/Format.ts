@@ -92,6 +92,44 @@ export const validaCpf = (value: string): boolean => {
     return true
 }
 
+export const validaCnpj = (value: string): boolean => {
+    const cnpjFormatado = formatarNumero(value)
+    const invalidos = ['00000000000000', '11111111111111', '22222222222222', '33333333333333', '44444444444444', '55555555555555', '66666666666666', '77777777777777', '88888888888888', '99999999999999']
+
+    if (cnpjFormatado?.length === 14 && !invalidos.includes(cnpjFormatado)) {
+        let tamanho = cnpjFormatado?.length - 2;
+        let numeros = cnpjFormatado?.substring(0, tamanho);
+        let digitos = cnpjFormatado?.substring(tamanho);
+        let soma: number = 0;
+        let pos = tamanho - 7;
+
+        for (let i = tamanho; i >= 1; i--) {
+            soma += parseInt(numeros.charAt(tamanho - i)) * pos--;
+            if (pos < 2) pos = 9;
+        }
+
+        let resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+        if (resultado !== parseInt(digitos.charAt(0))) return false;
+
+        tamanho = tamanho + 1;
+        numeros = cnpjFormatado?.substring(0, tamanho);
+        soma = 0;
+        pos = tamanho - 7;
+
+        for (let i = tamanho; i >= 1; i--) {
+            soma += parseInt(numeros.charAt(tamanho - i)) * pos--;
+            if (pos < 2) pos = 9;
+        }
+
+        resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+        if (resultado !== parseInt(digitos.charAt(1))) return false;
+
+        return true;
+    } else {
+        return false;
+    }
+}
+
 export const formatarExtras = (extras: Object): Object => {
     const extrasLimpos = {};
     for (const key in extras) {

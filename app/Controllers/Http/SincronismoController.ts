@@ -4,6 +4,8 @@ import DependenteVenda from 'App/Models/DependenteVenda'
 import DocumentoVenda from 'App/Models/DocumentoTitular'
 import ItemVenda from 'App/Models/ItemVenda'
 import TitularVenda from 'App/Models/TitularVenda'
+import { errorsFormat } from 'App/Util/ErrorsFormat'
+import SincronismoValidator from 'App/Validators/SincronismoValidator'
 import fs from 'fs'
 import { DateTime } from 'luxon'
 import path from 'path'
@@ -48,7 +50,7 @@ export default class SincronismosController {
 
     public async sincronismo({ request, response, auth }: HttpContextContract) {
         try {
-            const dados = request.body()
+            const dados = await request.validate(SincronismoValidator)
 
             const retornoContratos: any[] = []
 
@@ -70,7 +72,7 @@ export default class SincronismosController {
         } catch (error) {
             return response.status(error.status).send({
                 status: false,
-                message: 'Erro ao fazer sincronismo.',
+                message: errorsFormat(error)
             });
         }
     }
@@ -181,19 +183,6 @@ export default class SincronismosController {
     }
 
     public async validarContrato(contrato: any) {
-        if (typeof contrato.titular !== 'object') {
-            return {status: false, message: "Campo titular deve ser um objeto com os dados do contrato"}
-        }
-
-        if (!Array.isArray(contrato.dependentes)) {
-            return {status: false, message: "Campo dependentes deve ser um array com os objetos de cada dependente"}
-        }
-
-        if (!Array.isArray(contrato.itens)) {
-            return {status: false, message: "Campo item deve ser um array com os objetos de cada item"}
-        }
-
         return {status: true, message: "Sucesso"}
-
     }
 }
