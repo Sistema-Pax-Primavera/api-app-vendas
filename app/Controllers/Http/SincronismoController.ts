@@ -4,7 +4,7 @@ import DependenteVenda from 'App/Models/DependenteVenda'
 import DocumentoVenda from 'App/Models/DocumentoTitular'
 import ItemVenda from 'App/Models/ItemVenda'
 import TitularVenda from 'App/Models/TitularVenda'
-import { errorsFormat } from 'App/Util/ErrorsFormat'
+import { errorsFormat, formatErrorMessage } from 'App/Util/ErrorsFormat'
 import SincronismoValidator from 'App/Validators/SincronismoValidator'
 import fs from 'fs'
 import { DateTime } from 'luxon'
@@ -23,7 +23,7 @@ export default class SincronismosController {
 
             const arquivoBinario = Buffer.from(arquivoBase64, 'base64');
 
-            const nomeArquivo = `${DateTime.now().toFormat('yyyyMMddHHmmss')}.pdf`;
+            const nomeArquivo = `${ titularId + '_' + DateTime.now().toFormat('yyyyMMddHHmmss')}.pdf`;
 
             const caminhoArquivo = path.join(nomeArquivo);
 
@@ -56,12 +56,7 @@ export default class SincronismosController {
 
             for (const contrato of dados.contratos) {
                 const valida = await this.cadastrarContrato(contrato, auth)
-                if (!valida.status) {
-                    retornoContratos.push({ id: contrato.titular.id, message: valida.message })
-                    continue
-                }
-
-                retornoContratos.push({ id: contrato.titular.id, valida })
+                retornoContratos.push({ id: contrato.titular.id, ...valida})
             }
 
             return response.status(201).send({
@@ -79,11 +74,6 @@ export default class SincronismosController {
 
     public async cadastrarContrato(contrato: any, auth: AuthContract) {
         try {
-
-            const validaContrato = await this.validarContrato(contrato)
-
-            if(!validaContrato.status) throw new Error(validaContrato.message);
-
             const dadosTitular = {
                 unidadeId: contrato.titular.unidadeId,
                 nome: contrato.titular.nome,
@@ -140,6 +130,25 @@ export default class SincronismosController {
                 createdBy: auth.user?.nome
             }
 
+            const camposCobranca = [
+                'cep',
+                'estado',
+                'rua',
+                'logradouro',
+                'quadra',
+                'lote',
+                'numero',
+                'complemento'
+            ]
+
+            if (dadosTitular.enderecoComercial) {
+                camposCobranca.forEach((campo) => {
+                    dadosTitular[campo + 'Cobranca'] = dadosTitular[campo]
+                })
+                dadosTitular['municipioCobrancaId'] = dadosTitular['municipioId']
+                dadosTitular['bairroCobrancaId'] = dadosTitular['bairroId']
+            }
+
             const titular = await TitularVenda.create(dadosTitular)
 
             const dadosDependentes = contrato.dependentes ? contrato.dependentes.map((dependente: any) => {
@@ -171,18 +180,17 @@ export default class SincronismosController {
                 })
             }) : []
 
-            const [dependentes, itens] = await Promise.all([
-                await DependenteVenda.createMany(dadosDependentes),
-                await ItemVenda.createMany(dadosItens)
+            await Promise.all([
+                DependenteVenda.createMany(dadosDependentes),
+                ItemVenda.createMany(dadosItens)
             ])
 
-            return { status: true, titular, dependentes, itens }
+            return { 
+                status: true, 
+                titular: titular.id + '-' + titular.nome
+            }
         } catch (error) {
-            return { status: false, message: error.message }
+            return { status: false, message: formatErrorMessage(error) }
         }
-    }
-
-    public async validarContrato(contrato: any) {
-        return {status: true, message: "Sucesso"}
     }
 }
