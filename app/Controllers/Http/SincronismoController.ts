@@ -77,6 +77,11 @@ export default class SincronismosController {
 
     public async cadastrarContrato(contrato: any, auth: AuthContract) {
         try {
+
+            const validaContrato = await this.validarContrato(contrato)
+
+            if(!validaContrato.status) throw new Error(validaContrato.message);
+
             const dadosTitular = {
                 unidadeId: contrato.titular.unidadeId,
                 nome: contrato.titular.nome,
@@ -169,9 +174,26 @@ export default class SincronismosController {
                 await ItemVenda.createMany(dadosItens)
             ])
 
-            return { status: true, titular, dependentes, itens}
+            return { status: true, titular, dependentes, itens }
         } catch (error) {
             return { status: false, message: error.message }
         }
+    }
+
+    public async validarContrato(contrato: any) {
+        if (typeof contrato.titular !== 'object') {
+            return {status: false, message: "Campo titular deve ser um objeto com os dados do contrato"}
+        }
+
+        if (!Array.isArray(contrato.dependentes)) {
+            return {status: false, message: "Campo dependentes deve ser um array com os objetos de cada dependente"}
+        }
+
+        if (!Array.isArray(contrato.itens)) {
+            return {status: false, message: "Campo item deve ser um array com os objetos de cada item"}
+        }
+
+        return {status: true, message: "Sucesso"}
+
     }
 }
