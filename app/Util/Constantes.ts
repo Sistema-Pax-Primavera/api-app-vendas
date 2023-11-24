@@ -27,3 +27,15 @@ export const localCobranca: { id: number, descricao: string }[] = [
  *
  */
 export const portes: string[] = ['P', 'M', 'G', 'GG']
+
+export const tipoContrato: { id: number, descricao: string }[] = [
+    { id: 1, descricao: "CONTRATO NOVO" },
+    { id: 2, descricao: "TRANSFERÊNCIA DE FILIAL" },
+    { id: 3, descricao: "TRANSFERÊNCIA DE PLANO" },
+    { id: 4, descricao: "INCLUSÃO DE DEPENDENTE" },
+    { id: 5, descricao: "INCLUSÃO DE ADICIONAL" },
+    { id: 6, descricao: "REMOÃO DE DEPENDENTE" },
+    { id: 7, descricao: "REMOÇÃO DE ADICIONAL" },
+    { id: 8, descricao: "TRANSFERÊNCIA DE TITULAR" },
+    { id: 9, descricao: "TRANSFERÊNCIA DE TITULAR COM OBITO" }
+]

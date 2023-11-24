@@ -8,7 +8,7 @@ import Profissao from 'App/Models/Profissao'
 import Raca from 'App/Models/Raca'
 import Religiao from 'App/Models/Religiao'
 import Usuario from 'App/Models/Usuario'
-import { localCobranca, portes, tipoSexo } from 'App/Util/Constantes'
+import { localCobranca, portes, tipoSexo, tipoContrato } from 'App/Util/Constantes'
 import { errorsFormat } from 'App/Util/ErrorsFormat'
 import AutenticacaoValidator from 'App/Validators/AutenticacaoValidator'
 import { DateTime } from 'luxon'
@@ -69,6 +69,7 @@ export default class AutenticacaoController {
                     estado_civil: estadoCivil,
                     sexo: tipoSexo,
                     tipo_cobranca: localCobranca,
+                    tipo_contrato: tipoContrato,
                     portes: portes,
                     token
                 }
