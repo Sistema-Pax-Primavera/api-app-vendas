@@ -23,7 +23,7 @@ export default class SincronismosController {
 
             const arquivoBinario = Buffer.from(arquivoBase64, 'base64');
 
-            const nomeArquivo = `${ titularId + '_' + DateTime.now().toFormat('yyyyMMddHHmmss')}.pdf`;
+            const nomeArquivo = `${titularId + '_' + DateTime.now().toFormat('yyyyMMddHHmmss')}.pdf`;
 
             const caminhoArquivo = path.join(nomeArquivo);
 
@@ -48,7 +48,14 @@ export default class SincronismosController {
         }
     }
 
-    public async sincronismo({ request, response, auth }: HttpContextContract) {
+    /**
+     * Método de sincronismo dos contratos.
+     *
+     * @param {HttpContextContract} { request, response, auth }
+     * @return {*} 
+     * @memberof SincronismosController
+     */
+    public async sincronismo({ request, response, auth }: HttpContextContract): Promise<any> {
         try {
             const dados = await request.validate(SincronismoValidator)
 
@@ -56,7 +63,7 @@ export default class SincronismosController {
 
             for (const contrato of dados.contratos) {
                 const valida = await this.cadastrarContrato(contrato, auth)
-                retornoContratos.push({ id: contrato.titular.id, ...valida})
+                retornoContratos.push({ id: contrato.titular.id, ...valida })
             }
 
             return response.status(201).send({
@@ -72,8 +79,17 @@ export default class SincronismosController {
         }
     }
 
-    public async cadastrarContrato(contrato: any, auth: AuthContract) {
+    /**
+     * Método de cadastro dos contratos.
+     *
+     * @param {*} contrato
+     * @param {AuthContract} auth
+     * @return {*} 
+     * @memberof SincronismosController
+     */
+    public async cadastrarContrato(contrato: any, auth: AuthContract): Promise<any> {
         try {
+            // Formata os campos do titular.
             const dadosTitular = {
                 unidadeId: contrato.titular.unidadeId,
                 nome: contrato.titular.nome,
@@ -149,8 +165,10 @@ export default class SincronismosController {
                 dadosTitular['bairroCobrancaId'] = dadosTitular['bairroId']
             }
 
+            // Grava o registro do titular no banco de dados.
             const titular = await TitularVenda.create(dadosTitular)
 
+            // Formata os campos dos dependentes.
             const dadosDependentes = contrato.dependentes ? contrato.dependentes.map((dependente: any) => {
                 return ({
                     titularId: titular.id,
@@ -171,6 +189,7 @@ export default class SincronismosController {
                 })
             }) : []
 
+            // Formata os campos dos itens.
             const dadosItens = contrato.itens ? contrato.itens.map((item: any) => {
                 return ({
                     titularId: titular.id,
@@ -180,13 +199,14 @@ export default class SincronismosController {
                 })
             }) : []
 
+            // Persiste no banco os dados de dependentes e itens.
             await Promise.all([
                 DependenteVenda.createMany(dadosDependentes),
                 ItemVenda.createMany(dadosItens)
             ])
 
-            return { 
-                status: true, 
+            return {
+                status: true,
                 titular: titular.id + '-' + titular.nome
             }
         } catch (error) {

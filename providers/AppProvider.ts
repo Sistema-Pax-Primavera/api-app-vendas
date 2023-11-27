@@ -13,7 +13,7 @@ export default class AppProvider {
   }
 
   public async ready () {
-    // App is ready
+    // Read
   }
 
   public async shutdown () {
