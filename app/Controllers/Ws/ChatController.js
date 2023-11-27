@@ -10,11 +10,6 @@ class ChatController {
     console.log(this.socket.id)
     this.socket.broadcastToAll('message', message)
   }
-
-  onCommand(data) {
-    // Lógica para lidar com o comando recebido do servidor.
-    console.log('Comando recebido:', data);
-  }
 }
 
 module.exports = ChatController
