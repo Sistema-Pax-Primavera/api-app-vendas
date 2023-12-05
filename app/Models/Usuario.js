@@ -7,11 +7,15 @@ const Hash = use('Hash')
 const Model = use('Model')
 
 class Usuario extends Model {
-  static get table(){
+  static get table() {
     return 'public.usuario'
   }
 
-  static boot () {
+  permissao() {
+    this.hasMany('App/Models/Permissao')
+  }
+
+  static boot() {
     super.boot()
 
     /**
@@ -35,7 +39,7 @@ class Usuario extends Model {
    *
    * @return {Object}
    */
-  tokens () {
+  tokens() {
     return this.hasMany('App/Models/Token')
   }
 }

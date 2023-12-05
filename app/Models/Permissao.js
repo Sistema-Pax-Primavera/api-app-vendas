@@ -4,8 +4,12 @@
 const Model = use('Model')
 
 class Permissao extends Model {
-    static get table(){
+    static get table() {
         return 'public.permissao'
+    }
+
+    unidades() {
+        return this.hasOne('App/Models/Unidade')
     }
 }
 
