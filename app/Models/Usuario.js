@@ -6,7 +6,11 @@ const Hash = use('Hash')
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Model = use('Model')
 
-class User extends Model {
+class Usuario extends Model {
+  static get table(){
+    return 'public.usuario'
+  }
+
   static boot () {
     super.boot()
 
@@ -15,8 +19,8 @@ class User extends Model {
      * it to the database.
      */
     this.addHook('beforeSave', async (userInstance) => {
-      if (userInstance.dirty.password) {
-        userInstance.password = await Hash.make(userInstance.password)
+      if (userInstance.dirty.senha_app) {
+        userInstance.senha_app = await Hash.make(userInstance.senha_app)
       }
     })
   }
@@ -36,4 +40,4 @@ class User extends Model {
   }
 }
 
-module.exports = User
+module.exports = Usuario

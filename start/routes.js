@@ -16,5 +16,10 @@
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
 const Route = use('Route')
 
-Route.get('/send', 'SendController.sendMessage')
+Route.group(()=>{
+    
+Route.post('/', 'AutenticacaoController.autenticacao')
+
+}).prefix('api/v1/app-vendas')
+
 
