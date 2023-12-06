@@ -12,8 +12,23 @@ class Usuario extends Model {
   }
 
   permissao() {
-    this.hasMany('App/Models/Permissao')
+    return this.hasMany('App/Models/Permissao')
   }
+
+  toJSON() {
+    return {
+      id: this.id,
+      nome: this.nome,
+      cpf: this.cpf,
+      ativo: this.ativo,
+      unidades: this.getRelated('permissao').toJSON().map((item)=>{
+        return {
+          ...item.unidades
+        }
+      })
+    }
+  }
+
 
   static boot() {
     super.boot()

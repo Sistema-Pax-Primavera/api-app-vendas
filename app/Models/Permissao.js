@@ -9,7 +9,7 @@ class Permissao extends Model {
     }
 
     unidades() {
-        return this.hasOne('App/Models/Unidade')
+        return this.hasOne('App/Models/Unidade', 'unidade_id', 'id')
     }
 }
 
