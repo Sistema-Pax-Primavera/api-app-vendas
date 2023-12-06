@@ -11,73 +11,15 @@ class TitularVenda extends Model {
         return 'venda.titular_venda'
     }
 
-    id;
-    unidadeId;
-    nome;
-    rg;
-    cpfCnpj;
-    dataNascimento;
-    dataFalecimento;
-    estadoCivilId;
-    religiaoId;
-    naturalidade;
-    nacionalidade;
-    profissao;
-    sexo;
-    cremacao;
-    carencia;
-    adesao;
-    contrato;
-    telefone1;
-    telefone2;
-    email1;
-    email2;
-    enderecoComercial;
-    municipioId;
-    bairroId;
-    cep;
-    estado;
-    rua;
-    logradouro;
-    quadra;
-    lote;
-    numero;
-    complemento;
-    municipioCobrancaId;
-    bairroCobrancaId;
-    cepCobranca;
-    estadoCobranca;
-    ruaCobranca;
-    logradouroCobranca;
-    quadraCobranca;
-    loteCobranca;
-    numeroCobranca;
-    complementoCobranca;
-    planoId;
-    dataPrimeiraParcela;
-    diaPagamento;
-    vendedorId;
-    dataCancelamento;
-    dataContratoAnterior;
-    ultimoMesPagoAnterior;
-    empresaAnterior;
-    localCobranca;
-    horarioCobranca;
-    templateId;
-    createdAt;
-    createdBy;
-    updatedAt;
-    updatedBy;
-
     static boot() {
         super.boot()
 
         this.addHook('beforeSave', (titular) => {
             titular.nome = formatarString(titular.nome)
             titular.rg = formatarNumero(titular.rg)
-            titular.cpfCnpj = formatarNumero(titular.cpfCnpj)
-            titular.dataNascimento = formatarData(titular.dataNascimento)
-            titular.dataFalecimento = formatarData(titular.dataFalecimento)
+            titular.cpf_cnpj = formatarNumero(titular.cpf_cnpj)
+            titular.data_nascimento = formatarData(titular.data_nascimento)
+            titular.data_falecimento = formatarData(titular.data_falecimento)
             titular.naturalidade = formatarString(titular.naturalidade)
             titular.profissao = formatarString(titular.profissao)
             titular.telefone1 = formatarNumero(titular.telefone1)
@@ -90,20 +32,20 @@ class TitularVenda extends Model {
             titular.lote = formatarString(titular.lote)
             titular.numero = formatarString(titular.numero)
             titular.complemento = formatarString(titular.complemento)
-            titular.cepCobranca = formatarNumero(titular.cepCobranca)
-            titular.estadoCobranca = formatarString(titular.estadoCobranca)
-            titular.ruaCobranca = formatarString(titular.ruaCobranca)
-            titular.logradouroCobranca = formatarString(titular.logradouroCobranca)
-            titular.quadraCobranca = formatarString(titular.quadraCobranca)
-            titular.loteCobranca = formatarString(titular.loteCobranca)
-            titular.numeroCobranca = formatarString(titular.numeroCobranca)
-            titular.complementoCobranca = formatarString(titular.complementoCobranca)
-            titular.dataPrimeiraParcela = formatarData(titular.dataPrimeiraParcela)
-            titular.dataCancelamento = formatarData(titular.dataCancelamento)
-            titular.dataContratoAnterior = formatarData(titular.dataContratoAnterior)
-            titular.ultimoMesPagoAnterior = formatarData(titular.ultimoMesPagoAnterior)
-            titular.createdBy = formatarString(titular.createdBy)
-            titular.updatedBy = formatarString(titular.updatedBy)
+            titular.cep_cobranca = formatarNumero(titular.cep_cobranca)
+            titular.estado_cobranca = formatarString(titular.estado_cobranca)
+            titular.rua_cobranca = formatarString(titular.rua_cobranca)
+            titular.logradouro_cobranca = formatarString(titular.logradouro_cobranca)
+            titular.quadra_cobranca = formatarString(titular.quadra_cobranca)
+            titular.lote_cobranca = formatarString(titular.lote_cobranca)
+            titular.numero_cobranca = formatarString(titular.numero_cobranca)
+            titular.complemento_cobranca = formatarString(titular.complemento_cobranca)
+            titular.data_primeira_parcela = formatarData(titular.data_primeira_parcela)
+            titular.data_cancelamento = formatarData(titular.data_cancelamento)
+            titular.data_contrato_anterior = formatarData(titular.data_contrato_anterior)
+            titular.ultimo_mes_pago_anterior = formatarData(titular.ultimo_mes_pago_anterior)
+            titular.created_by = formatarString(titular.created_by)
+            titular.updated_by = formatarString(titular.updated_by)
         })
     }
 

@@ -1,7 +1,7 @@
 'use strict'
 
 const Format = require('../Utils/Format.js')
-const { formatarString, formatarDecimal, formatarNumero } = new Format()
+const { formatarString, formatarDecimal, formatarNumero, formatarData } = new Format()
 
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Model = use('Model')
@@ -11,26 +11,6 @@ class DependenteVenda extends Model {
     static get table() {
         return 'venda.dependente_venda'
     }
-
-    id;
-    titularId;
-    parentescoId;
-    racaId;
-    especieId;
-    nome;
-    cpf;
-    altura;
-    peso;
-    cor;
-    porte;
-    dataNascimento;
-    tipo;
-    cremacao;
-    adicionalId;
-    createdAt;
-    createdBy;
-    updatedAt;
-    updatedBy;
 
     static boot() {
         super.boot()
@@ -42,9 +22,9 @@ class DependenteVenda extends Model {
             dependente.peso = formatarDecimal(dependente.peso)
             dependente.cor = formatarString(dependente.cor)
             dependente.porte = formatarString(dependente.porte)
-            dependente.dataNascimento = formatarData(dependente.dataNascimento)
-            dependente.createdBy = formatarString(dependente.createdBy)
-            dependente.updatedBy = formatarString(dependente.updatedBy)
+            dependente.data_nascimento = formatarData(dependente.data_nascimento)
+            dependente.created_by = formatarString(dependente.created_by)
+            dependente.updated_by = formatarString(dependente.updated_by)
         })
     }
 }

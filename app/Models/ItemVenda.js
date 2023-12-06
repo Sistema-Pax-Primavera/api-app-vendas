@@ -11,20 +11,16 @@ class ItemVenda extends Model {
         return 'venda.item_venda'
     }
 
-    titularId;
-    itemId;
-    quantidade;
-    createdAt;
-    createdBy;
-    updatedAt;
-    updateBy;
+    static get primaryKey () {
+        return ['item_id', 'titular_id']
+    }
 
     static boot() {
         super.boot()
 
         this.addHook('beforeSave', (itemVenda) => {
-            itemVenda.createdBy = formatarString(itemVenda.createdBy)
-            itemVenda.updatedBy = formatarString(itemVenda.updatedBy)
+            itemVenda.created_by = formatarString(itemVenda.created_by)
+            itemVenda.updated_by = formatarString(itemVenda.updated_by)
         })
     }
 }

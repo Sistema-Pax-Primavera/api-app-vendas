@@ -21,5 +21,7 @@ Route.group(()=>{
     Route.post('/', 'AutenticacaoController.autenticacao')
 
     Route.post('upload', 'SincronismoController.uploadArquivoBase64').middleware('auth')
+    
+    Route.post('sincronismo', 'SincronismoController.sincronismo').middleware('auth')
 
 }).prefix('api/v1/app-vendas')
