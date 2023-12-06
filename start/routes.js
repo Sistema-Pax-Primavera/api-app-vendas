@@ -18,8 +18,8 @@ const Route = use('Route')
 
 Route.group(()=>{
     
-Route.post('/', 'AutenticacaoController.autenticacao')
+    Route.post('/', 'AutenticacaoController.autenticacao')
+
+    Route.post('upload', 'SincronismoController.uploadArquivoBase64').middleware('auth')
 
 }).prefix('api/v1/app-vendas')
-
-

@@ -11,20 +11,12 @@ class DocumentoTitular extends Model {
         return 'arquivo.titular_venda'
     }
 
-    id;
-    titularId;
-    documento;
-    createdAt;
-    createdBy;
-    updatedAt;
-    updatedBy;
-
     static boot() {
         super.boot()
 
         this.addHook('beforeSave', (arquivo) => {
-            arquivo.createdBy = formatarString(arquivo.createdBy)
-            arquivo.updatedBy = formatarString(arquivo.updatedBy)
+            arquivo.created_by = formatarString(arquivo.created_by)
+            arquivo.updated_by = formatarString(arquivo.updated_by)
         })
     }
 }
