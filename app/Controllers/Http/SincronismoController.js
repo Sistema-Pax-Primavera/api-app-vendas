@@ -15,9 +15,14 @@ const Municipio = use('App/Models/Municipio')
 const Bairro = use('App/Models/Bairro')
 const Plano = use('App/Models/Plano')
 const Template = use('App/Models/Template')
+const Parentesco = use('App/Models/Parentesco')
+const Raca = use('App/Models/Raca')
+const Especie = use('App/Models/Especie')
+const Adicional = use('App/Models/Adicional')
+const Item = use('App/Models/Item')
 
 const ErrorsFormat = require('../../Utils/ErrorsFormat')
-const { errorsFormat, formatErrorMessage } = new ErrorsFormat()
+const { errorsFormat } = new ErrorsFormat()
 
 const Format = require('../../Utils/Format');
 const { validaCpf, validaCnpj } = new Format()
@@ -114,20 +119,58 @@ class SincronismoController {
      */
     async cadastrarContrato(contrato, auth) {
         try {
-            // validar dados titular
+            const dadosTitular = await this.validaContrato(contrato.titular)
+            dadosTitular["created_by"] = auth.user?.nome
 
-            // validar dados dependente
+            contrato.dependentes.forEach(async (dependente) => {
+                await this.validaDependente(dependente)
+            });
 
-            // validar dados item
+            contrato.itens.forEach(async (item) => {
+                await this.validaItem(item)
+            });
 
-            // Insere titular
+            const titular = await TitularVenda.create(dadosTitular)
 
-            // Insere dependentes
+            const dadosDependentes = contrato.dependentes.map((dependente) => {
+                return ({
+                    titular_id: titular.id,
+                    parentesco_id: dependente.parentescoId,
+                    raca_id: dependente.racaId,
+                    especie_id: dependente.especieId,
+                    nome: dependente.nome,
+                    cpf: dependente.cpf,
+                    altura: dependente.altura,
+                    peso: dependente.peso,
+                    cor: dependente.cor,
+                    porte: dependente.porte,
+                    data_nascimento: dependente.dataNascimento,
+                    tipo: dependente.tipo,
+                    cremacao: dependente.cremacao,
+                    adicional_id: dependente.adicionalId,
+                    created_by: auth.user?.nome
+                })
+            })
 
-            // insere itens
-            return true
+            const dadosItens = contrato.itens.map((item) => {
+                return ({
+                    titular_id: titular.id,
+                    item_id: item.itemId,
+                    quantidade: item.quantidade,
+                    created_by: auth.user?.nome
+                })
+            })
+
+            // Persiste no banco os dados de dependentes e itens.
+            await Promise.all([
+                DependenteVenda.createMany(dadosDependentes),
+                ItemVenda.createMany(dadosItens)
+            ])
+
+            return { status: true, message: titular.id }
         } catch (error) {
-            return { status: false, message: error }
+            console.log(error)
+            return { status: false, message: error.message }
         }
     }
 
@@ -146,6 +189,7 @@ class SincronismoController {
             if (!titular.rg || typeof titular.rg !== 'string') {
                 throw new Error('Campo rg não informado ou inválido!')
             }
+
 
             if (!titular.dataNascimento) throw new Error('Campo data nascimento inválido!')
 
@@ -171,7 +215,7 @@ class SincronismoController {
 
             if (!titular.profissao) throw new Error('Campo profissão inválido!')
 
-            if (tipoSexo.findIndex(titular.sexo) == -1) throw new Error('Campo sexo inválido!')
+            if (tipoSexo.findIndex((item) => item.id == titular.sexo) == -1) throw new Error('Campo sexo inválido!')
 
             if (!titular.telefone1) throw new Error('Campo telefone 1 inválido!')
 
@@ -192,14 +236,6 @@ class SincronismoController {
             if (!titular.rua) throw new Error('Campo rua inválido!')
 
             if (!titular.logradouro) throw new Error('Campo logradouro inválido!')
-
-            if (!titular.quadra) throw new Error('Campo quadra inválido!')
-
-            if (!titular.lote) throw new Error('Campo lote inválido!')
-
-            if (!titular.numero) throw new Error('Campo número inválido!')
-
-            if (!titular.complemento) throw new Error('Campo complemento inválido!')
 
             if (titular.enderecoComercial) {
                 titular.municipioCobrancaId = titular.municipioId
@@ -229,13 +265,6 @@ class SincronismoController {
 
                 if (!titular.logradouroCobranca) throw new Error('Campo logradouro cobrança inválido!')
 
-                if (!titular.quadraCobranca) throw new Error('Campo quadra cobrança inválido!')
-
-                if (!titular.loteCobranca) throw new Error('Campo lote cobrança inválido!')
-
-                if (!titular.numeroCobranca) throw new Error('Campo número cobrança inválido!')
-
-                if (!titular.complementoCobranca) throw new Error('Campo complemento cobrança inválido!')
             }
 
             if (!titular.planoId || !isFinite(titular.planoId)) {
@@ -245,25 +274,130 @@ class SincronismoController {
             await Plano.findOrFail(titular.planoId)
 
             if (!titular.diaPagamento) throw new Error('Campo dia pagamento inválido!')
-            
-            if (localCobranca.findIndex(titular.localCobranca) == -1) throw new Error('Campo local cobrança inválido!')
+
+            if (localCobranca.findIndex((item) => item.id == titular.localCobranca) == -1) throw new Error('Campo local cobrança inválido!')
 
             if (!titular.templateId || !isFinite(titular.templateId)) {
                 throw new Error('Campo template não informado ou inválido!')
             }
 
             await Template.findOrFail(titular.templateId)
+
+            const dadosTitular = {
+                unidade_id: titular.unidadeId,
+                nome: titular.nome,
+                rg: titular.rg,
+                cpf_cnpj: titular.cpfCnpj,
+                data_nascimento: titular.dataNascimento,
+                data_falecimento: titular.dataFalecimento,
+                estado_civil_id: titular.estadoCivilId,
+                religiao_id: titular.religiaoId,
+                naturalidade: titular.naturalidade,
+                nacionalidade: titular.nacionalidade,
+                profissao: titular.profissao,
+                sexo: titular.sexo,
+                cremacao: titular.cremacao,
+                carencia: titular.carencia,
+                adesao: titular.adesao,
+                contrato: titular.contrato,
+                telefone1: titular.telefone1,
+                telefone2: titular.telefone2,
+                email1: titular.email1,
+                email2: titular.email2,
+                endereco_comercial: titular.enderecoComercial,
+                municipio_id: titular.municipioId,
+                bairro_id: titular.bairroId,
+                cep: titular.cep,
+                estado: titular.estado,
+                rua: titular.rua,
+                logradouro: titular.logradouro,
+                quadra: titular.quadra,
+                lote: titular.lote,
+                numero: titular.numero,
+                complemento: titular.complemento,
+                municipio_cobranca_id: titular.municipioCobrancaId,
+                bairro_cobranca_id: titular.bairroCobrancaId,
+                cep_cobranca: titular.cepCobranca,
+                estado_cobranca: titular.estadoCobranca,
+                rua_cobranca: titular.ruaCobranca,
+                logradouro_cobranca: titular.logradouroCobranca,
+                quadra_cobranca: titular.quadraCobranca,
+                lote_cobranca: titular.loteCobranca,
+                numero_cobranca: titular.numeroCobranca,
+                complemento_cobranca: titular.complementoCobranca,
+                plano_id: titular.planoId,
+                data_primeira_parcela: titular.dataPrimeiraParcela,
+                dia_pagamento: titular.diaPagamento,
+                vendedor_id: titular.vendedorId,
+                data_cancelamento: titular.dataCancelamento,
+                data_contrato_anterior: titular.dataContratoAnterior,
+                ultimo_mes_pago_anterior: titular.ultimoMesPagoAnterior,
+                empresa_anterior: titular.empresaAnterior,
+                local_cobranca: titular.localCobranca,
+                horario_cobranca: titular.horarioCobranca,
+                template_id: titular.templateId
+            }
+
+            return dadosTitular
         } catch (error) {
             throw new Error(error.message)
         }
     }
 
     async validaDependente(dependente) {
+        try {
+            if (!dependente.parentescoId || !isFinite(dependente.parentescoId)) {
+                throw new Error(`Campo parentesco não informado ou inválido para o dependente ${dependente.nome}!`)
+            }
 
+            await Parentesco.findOrFail(dependente.parentescoId)
+
+            if (dependente.racaId) {
+                await Raca.findOrFail(dependente.racaId)
+            }
+
+            if (dependente.especieId) {
+                await Especie.findOrFail(dependente.especieId)
+            }
+
+            if (!dependente.nome || typeof dependente.nome !== 'string') {
+                throw new Error('Campo nome não informado ou inválido!')
+            }
+
+            if (dependente.cpf) {
+                if (!validaCpf(dependente.cpf) && !validaCnpj(dependente.cpf)) throw new Error(`O CPF informado é inválido para o dependente ${dependente.nome}!`)
+            }
+
+            if (dependente.porte) {
+                if (portes.findIndex((item) => item == dependente.porte) == -1) throw new Error('Campo porte inválido!')
+            }
+
+            if (!dependente.dataNascimento) throw new Error('Campo data nascimento inválido!')
+
+            if (!dependente.tipo || [1, 2].findIndex((item) => item == dependente.tipo)) throw new Error('Campo tipo dependente inválido!')
+
+            if (dependente.adicionalId) {
+                await Adicional.findOrFail(dependente.adicionalId)
+            }
+        } catch (error) {
+            throw new Error(error.message)
+        }
     }
 
     async validaItem(item) {
+        try {
+            if (!item.itemId || !isFinite(item.itemId)) {
+                throw new Error('Campo item não informado ou inválido!')
+            }
 
+            await Item.findOrFail(item.itemId)
+
+            if (!item.quantidade || !isFinite(item.quantidade)) {
+                throw new Error('Campo quantidade não informado ou inválido!')
+            }
+        } catch (error) {
+            throw new Error(error.message)
+        }
     }
 }
 

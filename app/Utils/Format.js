@@ -70,7 +70,7 @@ class Format {
     }
 
     validaCpf(value) {
-        const cpfFormatado = formatarNumero(value)
+        const cpfFormatado = value.replace(/\D/g, '')
         const invalidos = ['00000000000', '11111111111', '22222222222', '33333333333', '44444444444', '55555555555', '66666666666', '77777777777', '88888888888', '99999999999']
 
         if (!cpfFormatado || cpfFormatado.length !== 11 || invalidos.includes(cpfFormatado)) return false
@@ -95,7 +95,7 @@ class Format {
     }
 
     validaCnpj(value) {
-        const cnpjFormatado = formatarNumero(value)
+        const cnpjFormatado = value.replace(/\D/g, '')
         const invalidos = ['00000000000000', '11111111111111', '22222222222222', '33333333333333', '44444444444444', '55555555555555', '66666666666666', '77777777777777', '88888888888888', '99999999999999']
 
         if (cnpjFormatado?.length === 14 && !invalidos.includes(cnpjFormatado)) {

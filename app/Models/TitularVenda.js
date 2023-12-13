@@ -10,10 +10,10 @@ class TitularVenda extends Model {
     static get table() {
         return 'venda.titular_venda'
     }
-
+    
     static boot() {
         super.boot()
-
+        
         this.addHook('beforeSave', (titular) => {
             titular.nome = formatarString(titular.nome)
             titular.rg = formatarNumero(titular.rg)
