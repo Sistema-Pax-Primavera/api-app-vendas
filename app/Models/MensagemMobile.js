@@ -11,15 +11,6 @@ class MensagemMobile extends Model {
         return 'venda.mensagem_mobile_venda'
     }
 
-    id;
-    vendedorId;
-    comando;
-    enviado;
-    createdAt;
-    createdBy;
-    updatedAt;
-    updatedBy;
-
     static boot(){
         super.boot()
 

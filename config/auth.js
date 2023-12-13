@@ -72,7 +72,8 @@ module.exports = {
     uid: 'cpf',
     password: 'senha_app',
     options: {
-      secret: Env.get('APP_KEY')
+      secret: Env.get('APP_KEY'),
+      expiresIn: '12h'
     }
   },
 
