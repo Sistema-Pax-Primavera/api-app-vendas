@@ -5,7 +5,7 @@ const Model = use('Model')
 
 class EstadoCivil extends Model {
     static get table(){
-        return 'public.especie'
+        return 'public.estado_civil'
     }
 }
 

@@ -37,7 +37,7 @@ class Unidade extends Model {
     itens() {
         return this.belongsToMany('App/Models/Item')
             .pivotTable('cobranca.plano_item')
-            .withPivot(['quantidade', 'valor_adesao', 'valor_mensalidade'])
+            .withPivot(['quantidade', 'valor_adesao', 'valor_mensalidade', 'plano_id'])
     }
 
     toJSON() {
@@ -90,6 +90,7 @@ class Unidade extends Model {
             itens: this.getRelated('itens').toJSON().map((item)=>{
                 let extras = item.pivot
                 delete item.pivot
+                item.categoria = item.categoria.descricao
                 return {
                     ...item,
                     ...extras

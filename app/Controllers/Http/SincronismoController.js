@@ -28,7 +28,7 @@ const Format = require('../../Utils/Format');
 const { validaCpf, validaCnpj } = new Format()
 
 const Constantes = require('../../Utils/Constantes');
-const { tipoContrato, tipoSexo, localCobranca, portes } = new Constantes()
+const { tipoSexo, localCobranca, portes } = new Constantes()
 
 class SincronismoController {
 
@@ -41,7 +41,18 @@ class SincronismoController {
      */
     async uploadArquivoBase64({ request, response, auth }) {
         try {
+            // Valida se o usuário está autenticado.
+            await auth
+
             const { arquivoBase64, titularId } = request.only(['arquivoBase64', 'titularId']);
+
+            // Valida se os dados foram informados.
+            if (!arquivoBase64 || !titularId) {
+                return response.status(400).send({
+                    status: false,
+                    message: 'Dados de entrada inválidos.',
+                });
+            }
 
             // Transforma o buffer do arquivo base64 em binário.
             const arquivoBinario = Buffer.from(arquivoBase64, 'base64');
@@ -53,7 +64,7 @@ class SincronismoController {
             const caminhoArquivo = path.join(nomeArquivo);
 
             // Cria o arquivo no caminho informado.
-            fs.writeFileSync(caminhoArquivo, arquivoBinario);
+            fs.writeFile(caminhoArquivo, arquivoBinario);
 
             // Grava no banco o caminho do documento.
             const arquivo = await DocumentoTitular.create({
@@ -68,7 +79,6 @@ class SincronismoController {
                 data: arquivo
             });
         } catch (error) {
-            console.log(error)
             return response.status(500).send({
                 status: false,
                 message: 'Erro ao fazer upload do arquivo.',
@@ -85,6 +95,7 @@ class SincronismoController {
      */
     async sincronismo({ request, response, auth }) {
         try {
+            await auth
             const dados = await request.body
 
             const retornoContratos = []
@@ -119,19 +130,24 @@ class SincronismoController {
      */
     async cadastrarContrato(contrato, auth) {
         try {
+            // Chama a função de validação do titular.
             const dadosTitular = await this.validaContrato(contrato.titular)
             dadosTitular["created_by"] = auth.user?.nome
 
+            // Valida os dependentes do contrato.
             contrato.dependentes.forEach(async (dependente) => {
                 await this.validaDependente(dependente)
             });
 
+            // Valida os itens do contrato.
             contrato.itens.forEach(async (item) => {
                 await this.validaItem(item)
             });
 
+            // Cadastra o titular.
             const titular = await TitularVenda.create(dadosTitular)
 
+            // Monta o array de dependentes.
             const dadosDependentes = contrato.dependentes.map((dependente) => {
                 return ({
                     titular_id: titular.id,
@@ -152,6 +168,7 @@ class SincronismoController {
                 })
             })
 
+            // Monta o array de itens.
             const dadosItens = contrato.itens.map((item) => {
                 return ({
                     titular_id: titular.id,
@@ -169,74 +186,103 @@ class SincronismoController {
 
             return { status: true, message: titular.id }
         } catch (error) {
-            console.log(error)
             return { status: false, message: error.message }
         }
     }
 
+    /**
+     * Método para validação dos titulares informados.
+     *
+     * @param {*} titular
+     * @return {*} 
+     * @memberof SincronismoController
+     */
     async validaContrato(titular) {
         try {
+            // Valida se a unidade foi informada.
             if (!titular.unidadeId || !isFinite(titular.unidadeId)) {
                 throw new Error('Campo unidade não informado ou inválido!')
             }
 
+            // Valida se a unidade existe.
             await Unidade.findOrFail(titular.unidadeId)
 
+            // Valida se o nome foi informado.
             if (!titular.nome || typeof titular.nome !== 'string') {
                 throw new Error('Campo nome não informado ou inválido!')
             }
 
+            // Valida se o rg foi informado.
             if (!titular.rg || typeof titular.rg !== 'string') {
                 throw new Error('Campo rg não informado ou inválido!')
             }
 
-
+            // Valida se a data de nascimento foi informada.
             if (!titular.dataNascimento) throw new Error('Campo data nascimento inválido!')
 
+            // Valida se o estado civil foi informado.
             if (!titular.estadoCivilId || !isFinite(titular.estadoCivilId)) {
                 throw new Error('Campo estado civil não informado ou inválido!')
             }
 
+            // Valida se o estado civil existe.
             await EstadoCivil.findOrFail(titular.estadoCivilId)
 
+            // Valida se a religião foi informada.
             if (!titular.religiaoId || !isFinite(titular.religiaoId)) {
                 throw new Error('Campo religião não informado ou inválido!')
             }
 
+            // Valida se a religião existe.
             await Religiao.findOrFail(titular.religiaoId)
 
+            // Valida se a naturalidade foi informada.
             if (!titular.naturalidade) throw new Error('Campo naturalidade inválido!')
 
+            // Valida se o cpf é válido para a titulares Brasileiros.
             if (titular.nacionalidade) {
                 if (titular.cpfCnpj) {
                     if (!validaCpf(titular.cpfCnpj) && !validaCnpj(titular.cpfCnpj)) throw new Error("O CPF ou CNPJ informado é inválido!")
                 }
             }
 
+            // Valida se a profissão foi informada.
             if (!titular.profissao) throw new Error('Campo profissão inválido!')
 
+            // Valida se o sexo é válido.
             if (tipoSexo.findIndex((item) => item.id == titular.sexo) == -1) throw new Error('Campo sexo inválido!')
 
+            // Valida se o telefone foi informado.
             if (!titular.telefone1) throw new Error('Campo telefone 1 inválido!')
 
+            // Valida se o email foi informado.
             if (!titular.email1) throw new Error('Campo email 1 inválido!')
 
+            // Valida se o municipio foi informado.
             if (!titular.municipioId && !isFinite(titular.municipioId)) throw new Error('Campo municipio inválido!')
 
+            // Valida se o municipio existe.
             await Municipio.findOrFail(titular.municipioId)
 
+            // Valida se o bairro foi informado.
             if (!titular.bairroId && !isFinite(titular.bairroId)) throw new Error('Campo bairro inválido!')
 
+            // Valida se o bairro existe.
             await Bairro.findOrFail(titular.bairroId)
 
+            // Valida se o cep foi informado.
             if (!titular.cep) throw new Error('Campo cep inválido!')
-
+            
+            // Valida se o estado foi informado.
             if (!titular.estado) throw new Error('Campo estado inválido!')
 
+            // Valida se a rua foi informada.
             if (!titular.rua) throw new Error('Campo rua inválido!')
 
+            // Valida se o logradouro foi informado.
             if (!titular.logradouro) throw new Error('Campo logradouro inválido!')
 
+            // Se o endereço comercial for o mesmo do residencial, então os dados são clonados.
             if (titular.enderecoComercial) {
                 titular.municipioCobrancaId = titular.municipioId
                 titular.bairroCobrancaId = titular.bairroId
@@ -249,38 +295,52 @@ class SincronismoController {
                 titular.numeroCobranca = titular.numero
                 titular.complementoCobranca = titular.complemento
             } else {
+                // Valida se o municipio de cobrança foi informado.
                 if (!titular.municipioCobrancaId && !isFinite(titular.municipioCobrancaId)) throw new Error('Campo municipio cobrança inválido!')
 
+                // Valida se o municipio de cobranca existe.
                 await Municipio.findOrFail(titular.municipioCobrancaId)
 
+                // Valida se o bairro de cobrança foi informado.
                 if (!titular.bairroCobrancaId && !isFinite(titular.bairroCobrancaId)) throw new Error('Campo bairro cobrança inválido!')
 
+                // Valida se o bairro cobrança existe.
                 await Bairro.findOrFail(titular.bairroCobrancaId)
 
+                // Valida se o cep de cobrança foi informado.
                 if (!titular.cepCobranca) throw new Error('Campo cep cobrança inválido!')
 
+                // Valida se o estado de cobrança foi informado.
                 if (!titular.estadoCobranca) throw new Error('Campo estado cobrança inválido!')
 
+                // Valida se a rua de cobrança foi informada.
                 if (!titular.ruaCobranca) throw new Error('Campo rua cobrança inválido!')
 
+                // Valida se o logradouro de cobrança foi informado.
                 if (!titular.logradouroCobranca) throw new Error('Campo logradouro cobrança inválido!')
 
             }
 
+            // Valida se o plano foi informado.  
             if (!titular.planoId || !isFinite(titular.planoId)) {
                 throw new Error('Campo plano não informado ou inválido!')
             }
 
+            // Valida se o plano existe.
             await Plano.findOrFail(titular.planoId)
 
+            // Valida se o dia de pagamento(vencimento) foi informado.
             if (!titular.diaPagamento) throw new Error('Campo dia pagamento inválido!')
 
+            // Verifica se o local de cobrança é válido.
             if (localCobranca.findIndex((item) => item.id == titular.localCobranca) == -1) throw new Error('Campo local cobrança inválido!')
 
+            // Valida se o template foi informado.
             if (!titular.templateId || !isFinite(titular.templateId)) {
                 throw new Error('Campo template não informado ou inválido!')
             }
 
+            // Valida se o template existe.
             await Template.findOrFail(titular.templateId)
 
             const dadosTitular = {
@@ -344,54 +404,66 @@ class SincronismoController {
         }
     }
 
+    /**
+     * Método para validação dos dependentes informados.
+     *
+     * @param {*} dependente
+     * @memberof SincronismoController
+     */
     async validaDependente(dependente) {
         try {
-            if (!dependente.parentescoId || !isFinite(dependente.parentescoId)) {
-                throw new Error(`Campo parentesco não informado ou inválido para o dependente ${dependente.nome}!`)
-            }
 
-            await Parentesco.findOrFail(dependente.parentescoId)
-
-            if (dependente.racaId) {
-                await Raca.findOrFail(dependente.racaId)
-            }
-
-            if (dependente.especieId) {
-                await Especie.findOrFail(dependente.especieId)
-            }
-
+            // Valida se o nome foi informado.
             if (!dependente.nome || typeof dependente.nome !== 'string') {
                 throw new Error('Campo nome não informado ou inválido!')
             }
 
+           // Validações opcionais
+            await Promise.all([
+                dependente.parentescoId && Parentesco.findOrFail(dependente.parentescoId),
+                dependente.racaId && Raca.findOrFail(dependente.racaId),
+                dependente.especieId && Especie.findOrFail(dependente.especieId),
+                dependente.adicionalId && Adicional.findOrFail(dependente.adicionalId),
+            ]);
+
+            // Valida se o cpf foi informado e é válido.
             if (dependente.cpf) {
                 if (!validaCpf(dependente.cpf) && !validaCnpj(dependente.cpf)) throw new Error(`O CPF informado é inválido para o dependente ${dependente.nome}!`)
             }
 
+            // Valida se o porte foi informado e é válido.
             if (dependente.porte) {
-                if (portes.findIndex((item) => item == dependente.porte) == -1) throw new Error('Campo porte inválido!')
+                if (portes.findIndex((item) => item == dependente.porte) === -1) throw new Error(`Campo porte inválido para o dependente ${dependente.nome}!`)
             }
 
-            if (!dependente.dataNascimento) throw new Error('Campo data nascimento inválido!')
+            // Valida se a data de nascimento foi informada.
+            if (!dependente.dataNascimento) throw new Error(`Campo data nascimento inválido para o dependente ${dependente.nome}!`)
 
-            if (!dependente.tipo || [1, 2].findIndex((item) => item == dependente.tipo)) throw new Error('Campo tipo dependente inválido!')
+            // Valida o tipo do dependente.
+            if ([1, 2].findIndex((item) => item == dependente.tipo)) throw new Error(`Campo tipo dependente inválido para o dependente ${dependente.nome}!`)
 
-            if (dependente.adicionalId) {
-                await Adicional.findOrFail(dependente.adicionalId)
-            }
         } catch (error) {
             throw new Error(error.message)
         }
     }
 
+    /**
+     * Método para validação dos itens informados.
+     *
+     * @param {*} item
+     * @memberof SincronismoController
+     */
     async validaItem(item) {
         try {
+            // Valida se o id foi informado e é válido.
             if (!item.itemId || !isFinite(item.itemId)) {
                 throw new Error('Campo item não informado ou inválido!')
             }
 
+            // Valida se o item existe.
             await Item.findOrFail(item.itemId)
 
+            // Valida a quantidade informada do item.
             if (!item.quantidade || !isFinite(item.quantidade)) {
                 throw new Error('Campo quantidade não informado ou inválido!')
             }

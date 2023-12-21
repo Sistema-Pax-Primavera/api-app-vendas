@@ -159,7 +159,7 @@ class AutenticacaoController {
                 'uf', 'municipio', 'bairro', 'rua', 'numero', 'complemento'
               ])
                 .with('templates', (templateQuery) => {
-                  templateQuery.select(['id', 'descricao', 'template'])
+                  templateQuery.select(['id', 'descricao', 'template', 'tipo'])
                     .where('venda.template.ativo', true)
                 })
                 .with('adicionais', (adicionalQuery) => {
@@ -176,6 +176,7 @@ class AutenticacaoController {
                 })
                 .with('itens', (itemQuery) => {
                   itemQuery.select(['id', 'descricao', 'categoria_item_id'])
+                    .with('categoria')
                     .where('public.item.ativo', true)
                 })
             })
