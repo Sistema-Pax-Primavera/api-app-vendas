@@ -1,15 +1,17 @@
 'use strict'
 
-class ChatController {
-  constructor ({ socket, request }) {
+const Ws = use('Ws')
+
+class WebScoketController {
+  constructor ({ socket, request, auth }) {
     this.socket = socket
     this.request = request
   }
 
   onMessage(message){
-    console.log(this.socket.id)
+    
     this.socket.broadcastToAll('message', message)
   }
 }
 
-module.exports = ChatController
+module.exports = WebScoketController

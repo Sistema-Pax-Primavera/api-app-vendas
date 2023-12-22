@@ -95,7 +95,9 @@ class SincronismoController {
      */
     async sincronismo({ request, response, auth }) {
         try {
+            // Valida se o usuário está autenticado.
             await auth
+            
             const dados = await request.body
 
             const retornoContratos = []
