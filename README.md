@@ -1,7 +1,31 @@
-# api-app-vendas
-Micro serviço do sistema pax primavera, responsável pelo gerenciamento, envio e recebimento de informações do aplicativo de vendas.
+# Adonis fullstack application
 
-Funcionalidades:
-    - Autenticação dos usuários com acesso ao aplicativo;
-    - Sincronismo de informações;
-    - Envio unidirecional API -> APP (Essa funcionalidade será gerenciada pela api-vendas)
+This is the fullstack boilerplate for AdonisJs, it comes pre-configured with.
+
+1. Bodyparser
+2. Session
+3. Authentication
+4. Web security middleware
+5. CORS
+6. Edge template engine
+7. Lucid ORM
+8. Migrations and seeds
+
+## Setup
+
+Use the adonis command to install the blueprint
+
+```bash
+adonis new yardstick
+```
+
+or manually clone the repo and then run `npm install`.
+
+
+### Migrations
+
+Run the following command to run startup migrations.
+
+```js
+adonis migration:run
+```
